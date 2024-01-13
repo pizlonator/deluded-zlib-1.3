@@ -98,7 +98,7 @@ local gzFile gz_open(const void *path, int fd, const char *mode) {
         return NULL;
 
     /* allocate gzFile structure to return */
-    state = (gz_statep)malloc(sizeof(gz_state));
+    state = zalloc(gz_state, 1);
     if (state == NULL)
         return NULL;
     state->size = 0;            /* no buffers allocated yet */

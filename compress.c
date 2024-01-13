@@ -29,10 +29,6 @@ int ZEXPORT compress2(Bytef *dest, uLongf *destLen, const Bytef *source,
     left = *destLen;
     *destLen = 0;
 
-    stream.zalloc = (alloc_func)0;
-    stream.zfree = (free_func)0;
-    stream.opaque = (voidpf)0;
-
     err = deflateInit(&stream, level);
     if (err != Z_OK) return err;
 

@@ -34,26 +34,6 @@ static z_const char hello[] = "hello, hello!";
 static const char dictionary[] = "hello";
 static uLong dictId;    /* Adler32 value of the dictionary */
 
-#ifdef Z_SOLO
-
-void *myalloc(void *q, unsigned n, unsigned m) {
-    (void)q;
-    return calloc(n, m);
-}
-
-void myfree(void *q, void *p) {
-    (void)q;
-    free(p);
-}
-
-static alloc_func zalloc = myalloc;
-static free_func zfree = myfree;
-
-#else /* !Z_SOLO */
-
-static alloc_func zalloc = (alloc_func)0;
-static free_func zfree = (free_func)0;
-
 /* ===========================================================================
  * Test compress() and uncompress()
  */
@@ -158,8 +138,6 @@ void test_gzio(const char *fname, Byte *uncompr, uLong uncomprLen) {
 #endif
 }
 
-#endif /* Z_SOLO */
-
 /* ===========================================================================
  * Test deflate() with small buffers
  */
@@ -167,10 +145,6 @@ void test_deflate(Byte *compr, uLong comprLen) {
     z_stream c_stream; /* compression stream */
     int err;
     uLong len = (uLong)strlen(hello)+1;
-
-    c_stream.zalloc = zalloc;
-    c_stream.zfree = zfree;
-    c_stream.opaque = (voidpf)0;
 
     err = deflateInit(&c_stream, Z_DEFAULT_COMPRESSION);
     CHECK_ERR(err, "deflateInit");
@@ -205,10 +179,6 @@ void test_inflate(Byte *compr, uLong comprLen, Byte *uncompr,
 
     strcpy((char*)uncompr, "garbage");
 
-    d_stream.zalloc = zalloc;
-    d_stream.zfree = zfree;
-    d_stream.opaque = (voidpf)0;
-
     d_stream.next_in  = compr;
     d_stream.avail_in = 0;
     d_stream.next_out = uncompr;
@@ -241,10 +211,6 @@ void test_large_deflate(Byte *compr, uLong comprLen, Byte *uncompr,
                         uLong uncomprLen) {
     z_stream c_stream; /* compression stream */
     int err;
-
-    c_stream.zalloc = zalloc;
-    c_stream.zfree = zfree;
-    c_stream.opaque = (voidpf)0;
 
     err = deflateInit(&c_stream, Z_BEST_SPEED);
     CHECK_ERR(err, "deflateInit");
@@ -297,10 +263,6 @@ void test_large_inflate(Byte *compr, uLong comprLen, Byte *uncompr,
 
     strcpy((char*)uncompr, "garbage");
 
-    d_stream.zalloc = zalloc;
-    d_stream.zfree = zfree;
-    d_stream.opaque = (voidpf)0;
-
     d_stream.next_in  = compr;
     d_stream.avail_in = (uInt)comprLen;
 
@@ -334,10 +296,6 @@ void test_flush(Byte *compr, uLong *comprLen) {
     int err;
     uInt len = (uInt)strlen(hello)+1;
 
-    c_stream.zalloc = zalloc;
-    c_stream.zfree = zfree;
-    c_stream.opaque = (voidpf)0;
-
     err = deflateInit(&c_stream, Z_DEFAULT_COMPRESSION);
     CHECK_ERR(err, "deflateInit");
 
@@ -369,10 +327,6 @@ void test_sync(Byte *compr, uLong comprLen, Byte *uncompr, uLong uncomprLen) {
     z_stream d_stream; /* decompression stream */
 
     strcpy((char*)uncompr, "garbage");
-
-    d_stream.zalloc = zalloc;
-    d_stream.zfree = zfree;
-    d_stream.opaque = (voidpf)0;
 
     d_stream.next_in  = compr;
     d_stream.avail_in = 2; /* just read the zlib header */
@@ -408,10 +362,6 @@ void test_dict_deflate(Byte *compr, uLong comprLen) {
     z_stream c_stream; /* compression stream */
     int err;
 
-    c_stream.zalloc = zalloc;
-    c_stream.zfree = zfree;
-    c_stream.opaque = (voidpf)0;
-
     err = deflateInit(&c_stream, Z_BEST_COMPRESSION);
     CHECK_ERR(err, "deflateInit");
 
@@ -444,10 +394,6 @@ void test_dict_inflate(Byte *compr, uLong comprLen, Byte *uncompr,
     z_stream d_stream; /* decompression stream */
 
     strcpy((char*)uncompr, "garbage");
-
-    d_stream.zalloc = zalloc;
-    d_stream.zfree = zfree;
-    d_stream.opaque = (voidpf)0;
 
     d_stream.next_in  = compr;
     d_stream.avail_in = (uInt)comprLen;

@@ -78,9 +78,6 @@ extern "C" {
   even in the case of corrupted input.
 */
 
-typedef voidpf (*alloc_func)(voidpf opaque, uInt items, uInt size);
-typedef void   (*free_func)(voidpf opaque, voidpf address);
-
 struct internal_state;
 
 typedef struct z_stream_s {
@@ -94,10 +91,6 @@ typedef struct z_stream_s {
 
     z_const char *msg;  /* last error message, NULL if no error */
     struct internal_state FAR *state; /* not visible by applications */
-
-    alloc_func zalloc;  /* used to allocate the internal state */
-    free_func  zfree;   /* used to free the internal state */
-    voidpf     opaque;  /* private data object passed to zalloc and zfree */
 
     int     data_type;  /* best guess about the data type: binary or text
                            for deflate, or the decoding state for inflate */
@@ -227,10 +220,8 @@ ZEXTERN const char * ZEXPORT zlibVersion(void);
 /*
 ZEXTERN int ZEXPORT deflateInit(z_streamp strm, int level);
 
-     Initializes the internal stream state for compression.  The fields
-   zalloc, zfree and opaque must be initialized before by the caller.  If
-   zalloc and zfree are set to Z_NULL, deflateInit updates them to use default
-   allocation functions.  total_in, total_out, adler, and msg are initialized.
+     Initializes the internal stream state for compression.
+   total_in, total_out, adler, and msg are initialized.
 
      The compression level must be Z_DEFAULT_COMPRESSION, or between 0 and 9:
    1 gives best speed, 9 gives best compression, 0 gives no compression at all
@@ -378,12 +369,11 @@ ZEXTERN int ZEXPORT deflateEnd(z_streamp strm);
 ZEXTERN int ZEXPORT inflateInit(z_streamp strm);
 
      Initializes the internal stream state for decompression.  The fields
-   next_in, avail_in, zalloc, zfree and opaque must be initialized before by
+   next_in, avail_in  must be initialized before by
    the caller.  In the current version of inflate, the provided input is not
    read or consumed.  The allocation of a sliding window will be deferred to
    the first call of inflate (if the decompression does not complete on the
-   first call).  If zalloc and zfree are set to Z_NULL, inflateInit updates
-   them to use default allocation functions.  total_in, total_out, adler, and
+   first call).  total_in, total_out, adler, and
    msg are initialized.
 
      inflateInit returns Z_OK if success, Z_MEM_ERROR if there was not enough
@@ -543,8 +533,7 @@ ZEXTERN int ZEXPORT deflateInit2(z_streamp strm,
                                  int memLevel,
                                  int strategy);
 
-     This is another version of deflateInit with more compression options.  The
-   fields zalloc, zfree and opaque must be initialized before by the caller.
+     This is another version of deflateInit with more compression options.
 
      The method parameter is the compression method.  It must be Z_DEFLATED in
    this version of the library.
@@ -687,8 +676,8 @@ ZEXTERN int ZEXPORT deflateCopy(z_streamp dest,
    consume lots of memory.
 
      deflateCopy returns Z_OK if success, Z_MEM_ERROR if there was not
-   enough memory, Z_STREAM_ERROR if the source stream state was inconsistent
-   (such as zalloc being Z_NULL).  msg is left unchanged in both source and
+   enough memory, Z_STREAM_ERROR if the source stream state was inconsistent.
+   msg is left unchanged in both source and
    destination.
 */
 
@@ -700,7 +689,7 @@ ZEXTERN int ZEXPORT deflateReset(z_streamp strm);
    set unchanged.  total_in, total_out, adler, and msg are initialized.
 
      deflateReset returns Z_OK if success, or Z_STREAM_ERROR if the source
-   stream state was inconsistent (such as zalloc or state being Z_NULL).
+   stream state was inconsistent.
 */
 
 ZEXTERN int ZEXPORT deflateParams(z_streamp strm,
@@ -835,7 +824,7 @@ ZEXTERN int ZEXPORT inflateInit2(z_streamp strm,
                                  int windowBits);
 
      This is another version of inflateInit with an extra parameter.  The
-   fields next_in, avail_in, zalloc, zfree and opaque must be initialized
+   fields next_in, avail_in must be initialized
    before by the caller.
 
      The windowBits parameter is the base two logarithm of the maximum window
@@ -953,8 +942,8 @@ ZEXTERN int ZEXPORT inflateCopy(z_streamp dest,
    stream.
 
      inflateCopy returns Z_OK if success, Z_MEM_ERROR if there was not
-   enough memory, Z_STREAM_ERROR if the source stream state was inconsistent
-   (such as zalloc being Z_NULL).  msg is left unchanged in both source and
+   enough memory, Z_STREAM_ERROR if the source stream state was inconsistent.  msg
+   is left unchanged in both source and
    destination.
 */
 
@@ -966,7 +955,7 @@ ZEXTERN int ZEXPORT inflateReset(z_streamp strm);
    total_in, total_out, adler, and msg are initialized.
 
      inflateReset returns Z_OK if success, or Z_STREAM_ERROR if the source
-   stream state was inconsistent (such as zalloc or state being Z_NULL).
+   stream state was inconsistent.
 */
 
 ZEXTERN int ZEXPORT inflateReset2(z_streamp strm,
@@ -979,7 +968,7 @@ ZEXTERN int ZEXPORT inflateReset2(z_streamp strm,
    by inflate() if needed.
 
      inflateReset2 returns Z_OK if success, or Z_STREAM_ERROR if the source
-   stream state was inconsistent (such as zalloc or state being Z_NULL), or if
+   stream state was inconsistent, or if
    the windowBits parameter is invalid.
 */
 
@@ -1077,9 +1066,7 @@ ZEXTERN int ZEXPORT inflateBackInit(z_streamp strm, int windowBits,
                                     unsigned char FAR *window);
 
      Initialize the internal stream state for decompression using inflateBack()
-   calls.  The fields zalloc, zfree and opaque in strm must be initialized
-   before the call.  If zalloc and zfree are Z_NULL, then the default library-
-   derived memory allocation routines are used.  windowBits is the base two
+   calls.  windowBits is the base two
    logarithm of the window size, in the range 8..15.  window is a caller
    supplied buffer of that size.  Except for special applications where it is
    assured that deflate was used with small window sizes, windowBits must be 15
