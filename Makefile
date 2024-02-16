@@ -12,7 +12,7 @@
 # To install in $HOME instead of /usr/local, use:
 #    make install prefix=$HOME
 
-CC=xcrun ../build/bin/clang
+CC=xcrun /Users/pizlo/Programs/llvm-project-deluge/zlib-1.3/../build/bin/clang
 
 CFLAGS=-O3 -g -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
@@ -23,7 +23,7 @@ CFLAGS=-O3 -g -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 SFLAGS=-O3 -g -fPIC -D_LARGEFILE64_SOURCE=1 -DHAVE_HIDDEN
 LDFLAGS=
 TEST_LDFLAGS=$(LDFLAGS) -L. libz.a
-LDSHARED=xcrun ../build/bin/clang -dynamiclib -install_name ${exec_prefix}/lib/libz.1.dylib -compatibility_version 1 -current_version 1.3
+LDSHARED=xcrun /Users/pizlo/Programs/llvm-project-deluge/zlib-1.3/../build/bin/clang -dynamiclib -install_name ${exec_prefix}/lib/libz.1.dylib -compatibility_version 1 -current_version 1.3
 CPP=
 
 STATICLIB=libz.a
@@ -41,7 +41,7 @@ TAR=tar
 SHELL=/bin/sh
 EXE=
 
-prefix =/usr/local
+prefix =/Users/pizlo/Programs/llvm-project-deluge/zlib-1.3/../pizfix
 exec_prefix =${prefix}
 libdir =${exec_prefix}/lib
 sharedlibdir =${libdir}
