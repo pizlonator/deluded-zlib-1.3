@@ -16,6 +16,9 @@
 #include "inffast.h"
 
 /*
+   strm provides memory allocation functions in zalloc and zfree, or
+   Z_NULL to use the library memory allocation functions.
+
    windowBits is in the range 8..15, and window is a user-supplied
    window and output buffer that is 2**windowBits bytes.
  */
@@ -31,7 +34,22 @@ int ZEXPORT inflateBackInit_(z_streamp strm, int windowBits,
         windowBits < 8 || windowBits > 15)
         return Z_STREAM_ERROR;
     strm->msg = Z_NULL;                 /* in case we return an error */
-    state = zalloc(struct inflate_state, 1);
+    if (strm->zalloc == (alloc_func)0) {
+#ifdef Z_SOLO
+        return Z_STREAM_ERROR;
+#else
+        strm->zalloc = zcalloc;
+        strm->opaque = (voidpf)0;
+#endif
+    }
+    if (strm->zfree == (free_func)0)
+#ifdef Z_SOLO
+        return Z_STREAM_ERROR;
+#else
+    strm->zfree = zcfree;
+#endif
+    state = (struct inflate_state FAR *)ZALLOC(strm, 1,
+                                               sizeof(struct inflate_state));
     if (state == Z_NULL) return Z_MEM_ERROR;
     Tracev((stderr, "inflate: allocated\n"));
     strm->state = (struct internal_state FAR *)state;
@@ -601,9 +619,9 @@ int ZEXPORT inflateBack(z_streamp strm, in_func in, void FAR *in_desc,
 }
 
 int ZEXPORT inflateBackEnd(z_streamp strm) {
-    if (strm == Z_NULL)
+    if (strm == Z_NULL || strm->state == Z_NULL || strm->zfree == (free_func)0)
         return Z_STREAM_ERROR;
-    zfree(strm->state);
+    ZFREE(strm, strm->state);
     strm->state = Z_NULL;
     Tracev((stderr, "inflate: end\n"));
     return Z_OK;
